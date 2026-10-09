@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vantage Peak - Painel</title>
+
+    <!-- Configuração do idioma: Português do Brasil -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'pt-BR',
+                includedLanguages: 'pt-BR,en',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+
+    <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+    </script>
+
+    <style>
+        :root {
+            --primary: #000000;
+            --accent: #d4af37;
+            --bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding-bottom: 90px;
+            background: var(--bg);
+            color: #1e293b;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #google_translate_element {
+            padding: 8px;
+            text-align: center;
+            background: #f8fafc;
+            font-size: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header {
+            background: #000;
+            color: white;
+            padding: 25px 20px 60px;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+        }
+
+        .profile-img {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .bank-name {
+            color: var(--accent);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 0 20px;
+            margin-top: -40px;
+        }
+
+        .balance-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+        }
+
+        .debit-card {
+            background: linear-gradient(135deg, #000000 0%, #2c2c2c 100%);
+            border-radius: 18px;
+            padding: 20px;
+            color: white;
+            position: relative;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+            margin: 0 auto 30px;
+            width: 85%;
+            max-width: 290px;
+            cursor: pointer;
+        }
+
+        .eye-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.2rem;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+
+        .chip {
+            width: 35px;
+            height: 28px;
+            background: linear-gradient(135deg, #d4af37, #f9e29c);
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .card-num {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+
+        .cvv-box {
+            font-size: 0.75rem;
+            color: var(--accent);
+            display: none;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        .val {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .card-white {
+            background: #fff;
+            padding: 5px 15px;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .trans-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 0;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+        }
+
+        .trans-info b {
+            display: block;
+            font-size: 1.1rem;
+            color: #000;
+            margin-bottom: 4px;
+        }
+
+        .trans-info span {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .amount-pos {
+            color: #10b981;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .amount-neg {
+            color: #ef4444;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 18px 0;
+            border-top: 1px solid #e2e8f0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.8rem;
+            border: none;
+            background: none;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #000;
+            font-weight: 900;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .spinner {
+            border: 4px solid #333;
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal-container {
+            text-align: center;
+            background: #fff;
+            padding: 25px;
+            border-radius: 20px;
+            width: 85%;
+            max-width: 310px;
+        }
+
+        .btn-confirm {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="google_translate_element"></div>
+
+    <!-- Janela de verificação do PIN -->
+    <div id="pinOverlay" class="overlay">
+        <div class="modal-container">
+            <h3 style="margin-top:0;">Verificação de segurança</h3>
+
+            <p style="font-size:0.8rem; color:#666;">
+                Digite seu PIN para visualizar os dados do cartão
+            </p>
+
+            <input
+                type="password"
+                id="pinInput"
+                inputmode="numeric"
+                style="border:none; border-bottom:3px solid #000; font-size:2.5rem; text-align:center; width:140px; outline:none; letter-spacing:8px;"
+                maxlength="4"
+                placeholder="••••"
+                aria-label="Digite seu PIN">
+
+            <button class="btn-confirm" onclick="verifyPin()">
+                DESBLOQUEAR
+            </button>
+
+            <button
+                onclick="closeModals()"
+                style="background:none; border:none; color:#ff3b30; margin-top:15px; font-weight:bold;">
+                Cancelar
+            </button>
+        </div>
+    </div>
+
+    <!-- Janela de carregamento do comprovante -->
+    <div id="receiptOverlay" class="overlay">
+
+        <div id="loadingReceipt" style="display:none; text-align:center; color:#fff;">
+            <div class="spinner"></div>
+            <p style="letter-spacing:1px; font-size:0.8rem;">
+                RECUPERANDO REGISTRO...
+            </p>
+        </div>
+
+        <div class="modal-container" id="receiptContent" style="display:none;">
+
+            <div style="font-size:0.6rem; color:var(--accent); font-weight:bold; letter-spacing:2px;">
+                REGISTRO DE TRANSAÇÃO — DEMONSTRAÇÃO
+            </div>
+
+            <div
+                id="receiptData"
+                style="text-align:left; font-family:'Courier New', monospace; margin-top:20px; font-size:0.85rem; line-height:1.6;">
+            </div>
+
+            <button class="btn-confirm" onclick="closeModals()">
+                CONCLUÍDO
+            </button>
+        </div>
+    </div>
+
+    <div class="header">
+
+        <img
+            src="profile.jpg"
+            class="profile-img"
+            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Nina+Hyun&background=000000&color=d4af37';"
+            alt="Foto do perfil">
+
+        <div style="font-weight:700; font-size:1.2rem;">
+            Nina Hyun
+        </div>
+
+        <div class="bank-name">
+            Vantage Peak Financial
+        </div>
+
+    </div>
+
+    <div class="content">
+
+        <div class="balance-card">
+
+            <div style="font-size:0.7rem; color:#888; font-weight:600;">
+                SALDO DISPONÍVEL TOTAL
+            </div>
+
+            <div style="font-size:2.3rem; font-weight:900; margin-top:5px; color:#000;">
+                $2,326,500.00
+            </div>
+
+            <div style="font-size:0.7rem; color:#b45309; margin-top:8px;">
+                Valores ilustrativos — demonstração
+            </div>
+
+        </div>
+
+        <!-- Cartão demonstrativo -->
+        <div class="debit-card" onclick="showPinModal()">
+
+            <span class="eye-icon">👁️</span>
+
+            <div class="chip"></div>
+
+            <div class="card-num" id="cardNum">
+                5216 **** **** 9923
+            </div>
+
+            <div id="cvvBox" class="cvv-box">
+                CVV: ***
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+
+                <div>
+                    <div class="label">Titular</div>
+                    <div class="val">Nina Hyun</div>
+                </div>
+
+                <div style="text-align:right;">
+                    <div class="label">Validade</div>
+                    <div class="val">04/30</div>
+                </div>
+
+            </div>
+        </div>
+
+        <h3 style="font-size:1rem; font-weight:800; margin-bottom:15px; color:#000;">
+            Transações recentes
+        </h3>
+
+        <div class="card-white">
+
+            <div class="trans-row"
+                onclick="openReceipt('Zelina Lopez', '-$10,000.00', '16 de setembro de 2026')">
+
+                <div class="trans-info">
+                    <b>Zelina Lopez</b>
+                    <span>16 de setembro de 2026 • 05:34</span>
+                </div>
+
+                <div class="amount-neg">-$10,000.00</div>
+            </div>
+
+            <div class="trans-row"
+                onclick="openReceipt('Luxury Estate Mgmt', '-$4,200.00', '25 de agosto de 2026')">
+
+                <div class="trans-info">
+                    <b>Luxury Estate Mgmt</b>
+                    <span>25 de agosto de 2026 • 10:05</span>
+                </div>
+
+                <div class="amount-neg">-$4,200.00</div>
+            </div>
+
+            <div class="trans-row"
+                onclick="openReceipt('Marcus Thorne', '-$12,800.00', '7 de julho de 2026')">
+
+                <div class="trans-info">
+                    <b>Marcus Thorne</b>
+                    <span>7 de julho de 2026 • 16:30</span>
+                </div>
+
+                <div class="amount-neg">-$12,800.00</div>
+            </div>
+
+            <div class="trans-row"
+                onclick="openReceipt('Elena Rodriguez', '+$150,000.00', '18 de abril de 2026')">
+
+                <div class="trans-info">
+                    <b>Elena Rodriguez</b>
+                    <span>18 de abril de 2026 • 09:00</span>
+                </div>
+
+                <div class="amount-pos">+$150,000.00</div>
+            </div>
+
+            <div class="trans-row"
+                onclick="openReceipt('Global Equity Fund', '-$50,000.00', '28 de março de 2026')">
+
+                <div class="trans-info">
+                    <b>Global Equity Fund</b>
+                    <span>28 de março de 2026 • 11:20</span>
+                </div>
+
+                <div class="amount-neg">-$50,000.00</div>
+            </div>
+
+            <div class="trans-row"
+                style="border:none;"
+                onclick="openReceipt('Julianna Rossi', '+$2,100.00', '20 de março de 2026')">
+
+                <div class="trans-info">
+                    <b>Julianna Rossi</b>
+                    <span>20 de março de 2026 • 15:45</span>
+                </div>
+
+                <div class="amount-pos">+$2,100.00</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Navegação inferior -->
+    <nav class="bottom-nav">
+
+        <button class="nav-item active"
+            onclick="location.href='dashboard.html'">
+            <span class="nav-icon">🏠</span>
+            Início
+        </button>
+
+        <button class="nav-item"
+            onclick="location.href='transfer.html'">
+            <span class="nav-icon">💸</span>
+            Transferir
+        </button>
+
+        <button class="nav-item"
+            onclick="location.href='settings.html'">
+            <span class="nav-icon">⚙️</span>
+            Configurações
+        </button>
+
+        <button class="nav-item"
+            onclick="location.href='index.html'"
+            style="color:#ff3b30;">
+            <span class="nav-icon">⏻</span>
+            Sair
+        </button>
+
+    </nav>
+
+    <script>
+        function showPinModal() {
+            document.getElementById('pinOverlay').style.display = 'flex';
+            document.getElementById('pinInput').focus();
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.overlay').forEach(function(overlay) {
+                overlay.style.display = 'none';
+            });
+        }
+
+        function verifyPin() {
+            const input = document.getElementById('pinInput');
+
+            // PIN de demonstração: não desbloqueia um cartão bancário real.
+            if (input.value === "1590") {
+                document.getElementById('cardNum').innerText =
+                    "5216 **** **** 9923";
+
+                document.getElementById('cvvBox').innerText =
+                    "DADOS DO CARTÃO OCULTOS";
+
+                document.getElementById('cvvBox').style.display = 'block';
+
+                closeModals();
+                input.value = "";
+
+            } else {
+                alert("Erro de segurança: PIN incorreto.");
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        function openReceipt(name, amt, date) {
+            const overlay = document.getElementById('receiptOverlay');
+
+            overlay.style.display = 'flex';
+
+            document.getElementById('loadingReceipt').style.display = 'block';
+            document.getElementById('receiptContent').style.display = 'none';
+
+            setTimeout(function() {
+                document.getElementById('loadingReceipt').style.display = 'none';
+                document.getElementById('receiptContent').style.display = 'block';
+
+                const receiptData = document.getElementById('receiptData');
+
+                // Os dados são inseridos como texto para evitar interpretar
+                // nomes ou outros valores como código HTML.
+                receiptData.replaceChildren();
+
+                const reference = document.createElement('p');
+                const refLabel = document.createElement('b');
+                refLabel.textContent = 'Referência: ';
+                reference.appendChild(refLabel);
+                reference.appendChild(document.createTextNode('DEMO-' + Math.floor(100000 + Math.random() * 900000)));
+
+                const dateRow = document.createElement('p');
+                const dateLabel = document.createElement('b');
+                dateLabel.textContent = 'Data: ';
+                dateRow.appendChild(dateLabel);
+                dateRow.appendChild(document.createTextNode(date));
+
+                const payee = document.createElement('p');
+                const payeeLabel = document.createElement('b');
+                payeeLabel.textContent = 'Destinatário: ';
+                payee.appendChild(payeeLabel);
+                payee.appendChild(document.createTextNode(name));
+
+                const status = document.createElement('p');
+                const statusLabel = document.createElement('b');
+                statusLabel.textContent = 'Status: ';
+                status.appendChild(statusLabel);
+                status.appendChild(document.createTextNode('DEMONSTRAÇÃO'));
+
+                const amount = document.createElement('div');
+                amount.style.borderTop = '1px dashed #ddd';
+                amount.style.margin = '15px 0';
+                amount.style.paddingTop = '15px';
+                amount.style.textAlign = 'center';
+                amount.style.fontSize = '1.4rem';
+                amount.style.fontWeight = 'bold';
+                amount.style.color = amt.includes('+') ? '#10b981' : '#ef4444';
+                amount.textContent = amt;
+
+                receiptData.append(reference, dateRow, payee, status, amount);
+
+            }, 2500);
+        }
+    </script>
+
+</body>
+</html>
