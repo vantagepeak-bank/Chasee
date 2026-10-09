@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vantage Peak - Transferências</title>
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #fbbf24;
+            --bg: #f8fafc;
+            --success: #22c55e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding-bottom: 90px;
+            background: var(--bg);
+            color: #1e293b;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .transfer-card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .bill-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .bill-item {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .bill-item:active {
+            transform: scale(0.95);
+        }
+
+        .bill-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .bill-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: block;
+        }
+
+        .bill-desc {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .error-field {
+            border: 2px solid #ef4444 !important;
+            background: #fff1f2 !important;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 24px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        .tax-info {
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        .contact-notice {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 18px;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 12px;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 1px solid #e2e8f0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .converter-result {
+            margin-top: 10px;
+            padding: 12px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            border-left: 4px solid var(--accent);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Aviso sobre transferências internacionais -->
+    <div id="tax-overlay" class="overlay">
+        <div class="modal">
+
+            <h3 style="margin-top:0;">Aviso sobre transferências internacionais</h3>
+
+            <p style="font-size:0.85rem; color:#64748b;">
+                Esta demonstração exibe uma taxa ilustrativa para transferências internacionais.
+                Consulte sua instituição financeira para confirmar eventuais tarifas aplicáveis.
+            </p>
+
+            <div class="tax-info">
+                <strong>Taxa ilustrativa: 5,8%</strong><br>
+                Valor estimado: <span id="tax-amount">$290.00</span>
+            </div>
+
+            <div class="contact-notice">
+                Para obter informações sobre tarifas e procedimentos, entre em contato com o suporte:<br>
+                <a
+                    href="mailto:vantagecustomerservice200@gmail.com"
+                    style="font-weight:bold; color:var(--primary); text-decoration:none;">
+                    vantagecustomerservice200@gmail.com
+                </a>
+            </div>
+
+            <button
+                class="btn-primary"
+                style="margin-top:20px;"
+                onclick="confirmTransfer()">
+                Continuar
+            </button>
+
+            <button class="btn-outline" onclick="closeTaxModal()">
+                Cancelar
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Janela de carregamento -->
+    <div id="loading-overlay" class="overlay">
+        <div class="modal">
+            <p>Verificando os protocolos de segurança...</p>
+        </div>
+    </div>
+
+    <!-- Cabeçalho -->
+    <div class="header">
+        <div style="color:var(--accent); font-size:0.7rem; letter-spacing:2px;">
+            VANTAGE PEAK
+        </div>
+
+        <div style="font-weight:bold; font-size:1.1rem; margin-top:5px;">
+            Central de Pagamentos
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- Abas -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('local', event)">
+                Transferência nacional (EUA)
+            </div>
+
+            <div class="tab" onclick="showTab('international', event)">
+                Internacional
+            </div>
+
+            <div class="tab" onclick="showTab('bills', event)">
+                Pagamento de contas
+            </div>
+        </div>
+
+        <!-- Transferências nacionais -->
+        <div id="local-section" class="transfer-card">
+
+            <div class="form-group">
+                <label for="l-name">Nome completo do destinatário</label>
+                <input
+                    type="text"
+                    id="l-name"
+                    class="v-field"
+                    placeholder="Digite o nome completo">
+            </div>
+
+            <div class="form-group">
+                <label for="l-bank-select">Selecione o banco</label>
+
+                <select id="l-bank-select">
+                    <option>JPMorgan Chase</option>
+                    <option>Bank of America</option>
+                    <option>Wells Fargo</option>
+                    <option>Citibank</option>
+                    <option>U.S. Bank</option>
+                    <option>PNC Bank</option>
+                    <option>Truist Bank</option>
+                    <option>Goldman Sachs</option>
+                    <option>Capital One</option>
+                    <option>TD Bank</option>
+                    <option>Fifth Third Bank</option>
+                    <option>Morgan Stanley</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="l-acc">Número da conta</label>
+                <input type="text" id="l-acc" class="v-field">
+            </div>
+
+            <div class="form-group">
+                <label for="l-amt">Valor (USD)</label>
+                <input
+                    type="number"
+                    id="l-amt"
+                    class="v-field"
+                    min="0.01"
+                    step="0.01">
+            </div>
+
+            <button class="btn-primary" onclick="validateLocal()">
+                Enviar dinheiro
+            </button>
+
+        </div>
+
+        <!-- Transferências internacionais -->
+        <div id="international-section" class="transfer-card hidden">
+
+            <div class="form-group">
+                <label for="i-name">Nome completo do destinatário</label>
+                <input
+                    type="text"
+                    id="i-name"
+                    class="v-field"
+                    placeholder="Nome completo conforme documento">
+            </div>
+
+            <div class="form-group">
+                <label for="i-bank-name">Nome do banco destinatário</label>
+                <input
+                    type="text"
+                    id="i-bank-name"
+                    class="v-field"
+                    placeholder="Ex.: HSBC, Deutsche Bank">
+            </div>
+
+            <div class="form-group">
+                <label for="i-iban">IBAN / Número da conta</label>
+                <input type="text" id="i-iban" class="v-field">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+
+                <div class="form-group" style="flex:2;">
+                    <label for="i-amt">Valor (USD)</label>
+                    <input
+                        type="number"
+                        id="i-amt"
+                        class="v-field"
+                        min="0.01"
+                        step="0.01"
+                        oninput="updateLiveConv()">
+                </div>
+
+                <div class="form-group" style="flex:1.5;">
+                    <label for="i-curr">Moeda</label>
+
+                    <select id="i-curr" onchange="updateLiveConv()">
+                        <option value="EUR">EUR (Euro)</option>
+                        <option value="BRL">BRL (Real brasileiro)</option>
+                        <option value="GBP">GBP (Libra esterlina)</option>
+                        <option value="TWD">TWD (Dólar taiwanês)</option>
+                        <option value="AUD">AUD (Dólar australiano)</option>
+                        <option value="CAD">CAD (Dólar canadense)</option>
+                        <option value="HKD">HKD (Dólar de Hong Kong)</option>
+                        <option value="TRY">TRY (Lira turca)</option>
+                        <option value="SGD">SGD (Dólar de Singapura)</option>
+                        <option value="CLP">CLP (Peso chileno)</option>
+                        <option value="JPY">JPY (Iene japonês)</option>
+                        <option value="PLN">PLN (Zlóti polonês)</option>
+                        <option value="RON">RON (Leu romeno)</option>
+                        <option value="ZAR">ZAR (Rand sul-africano)</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="converter-result">
+                <span>Valor convertido:</span>
+                <span id="conv-val">0,00 EUR</span>
+            </div>
+
+            <p style="font-size:0.75rem; color:#64748b;">
+                Conversão demonstrativa. As taxas não são atualizadas em tempo real.
+            </p>
+
+            <button
+                class="btn-primary"
+                style="margin-top:20px;"
+                onclick="validateInternational()">
+                Continuar transferência internacional
+            </button>
+
+        </div>
+
+        <!-- Pagamento de contas -->
+        <div id="bills-section" class="hidden">
+
+            <h4 style="margin:0 0 15px 5px; color:var(--primary);">
+                Pagamentos rápidos
+            </h4>
+
+            <div class="bill-grid">
+
+                <div class="bill-item" onclick="selectBill('Serviços públicos')">
+                    <span class="bill-icon">⚡</span>
+                    <span class="bill-name">Serviços públicos</span>
+                    <span class="bill-desc">Água, gás e eletricidade</span>
+                </div>
+
+                <div class="bill-item" onclick="selectBill('Internet')">
+                    <span class="bill-icon">🌐</span>
+                    <span class="bill-name">Internet</span>
+                    <span class="bill-desc">Fibra óptica e Wi-Fi</span>
+                </div>
+
+                <div class="bill-item" onclick="selectBill('Telefonia móvel')">
+                    <span class="bill-icon">📱</span>
+                    <span class="bill-name">Telefonia móvel</span>
+                    <span class="bill-desc">Planos mensais</span>
+                </div>
+
+                <div class="bill-item" onclick="selectBill('Seguros')">
+                    <span class="bill-icon">🛡️</span>
+                    <span class="bill-name">Seguros</span>
+                    <span class="bill-desc">Saúde e automóvel</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegação inferior -->
+    <nav class="bottom-nav">
+
+        <button class="nav-item" onclick="goTo('dashboard.html')">
+            🏠 Início
+        </button>
+
+        <button class="nav-item active" onclick="goTo('transfer.html')">
+            💸 Transferir
+        </button>
+
+        <button class="nav-item" onclick="goTo('settings.html')">
+            ⚙️ Configurações
+        </button>
+
+        <button
+            class="nav-item"
+            onclick="location.href='index.html'"
+            style="color:#ef4444;">
+            ⏻ Sair
+        </button>
+
+    </nav>
+
+    <script>
+        function goTo(page) {
+            window.location.href = page;
+        }
+
+        function showTab(type, e) {
+            document.querySelectorAll(
+                '.transfer-card, #bills-section'
+            ).forEach(function(section) {
+                section.classList.add('hidden');
+            });
+
+            document.querySelectorAll('.tab').forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+
+            const section = type === 'bills'
+                ? document.getElementById('bills-section')
+                : document.getElementById(type + '-section');
+
+            section.classList.remove('hidden');
+
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('active');
+            }
+        }
+
+        function updateLiveConv() {
+            const usd = parseFloat(document.getElementById('i-amt').value);
+            const curr = document.getElementById('i-curr').value;
+
+            // Valores ilustrativos, não são cotações em tempo real.
+            const rates = {
+                EUR: 0.92,
+                GBP: 0.79,
+                TWD: 31.74,
+                AUD: 1.51,
+                ZAR: 16.56,
+                CAD: 1.35,
+                RON: 0.23,
+                HKD: 7.82,
+                CLP: 899.58,
+                TRY: 44.58,
+                SGD: 1.34,
+                JPY: 151.2,
+                PLN: 3.98,
+                BRL: 5.12
+            };
+
+            const result = document.getElementById('conv-val');
+
+            if (Number.isFinite(usd) && usd > 0) {
+                const converted = usd * rates[curr];
+
+                result.innerText =
+                    converted.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) + ' ' + curr;
+            } else {
+                result.innerText =
+                    (0).toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2
+                    }) + ' ' + curr;
+            }
+        }
+
+        function validateInternational() {
+            let isValid = true;
+
+            document.querySelectorAll(
+                '#international-section .v-field'
+            ).forEach(function(input) {
+
+                if (!input.value.trim()) {
+                    input.classList.add('error-field');
+                    isValid = false;
+                } else {
+                    input.classList.remove('error-field');
+                }
+            });
+
+            if (!isValid) {
+                alert('Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const amountField = document.getElementById('i-amt');
+            const enteredAmount = parseFloat(amountField.value);
+
+            if (!Number.isFinite(enteredAmount) || enteredAmount <= 0) {
+                amountField.classList.add('error-field');
+
+                alert('Digite um valor válido para a transferência.');
+                return;
+            }
+
+            /*
+             * Esta tela é uma demonstração.
+             * Não exige nem cobra uma taxa real.
+             */
+            const illustrativeTax = enteredAmount * 0.058;
+
+            document.getElementById('tax-amount').innerText =
+                illustrativeTax.toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                });
+
+            document.getElementById('tax-overlay').style.display = 'flex';
+        }
+
+        function closeTaxModal() {
+            document.getElementById('tax-overlay').style.display = 'none';
+        }
+
+        function confirmTransfer() {
+            closeTaxModal();
+
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            setTimeout(function() {
+                document.getElementById('loading-overlay').style.display = 'none';
+
+                alert(
+                    'Esta é uma demonstração. Nenhuma transferência foi enviada. ' +
+                    'Para realizar uma transferência real, utilize os canais oficiais ' +
+                    'da sua instituição financeira.'
+                );
+            }, 1500);
+        }
+
+        function validateLocal() {
+            let isValid = true;
+
+            document.querySelectorAll(
+                '#local-section .v-field'
+            ).forEach(function(input) {
+
+                if (!input.value.trim()) {
+                    input.classList.add('error-field');
+                    isValid = false;
+                } else {
+                    input.classList.remove('error-field');
+                }
+            });
+
+            if (!isValid) {
+                alert('Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const amount = parseFloat(
+                document.getElementById('l-amt').value
+            );
+
+            if (!Number.isFinite(amount) || amount <= 0) {
+                document.getElementById('l-amt').classList.add('error-field');
+
+                alert('Digite um valor válido para a transferência.');
+                return;
+            }
+
+            alert(
+                'O serviço de transferência nacional não está conectado. ' +
+                'Nenhuma transferência foi realizada.'
+            );
+        }
+
+        function selectBill(service) {
+            alert(
+                'Serviço selecionado: ' + service + '. ' +
+                'O pagamento de contas ainda não está conectado.'
+            );
+        }
+
+        // Atualiza o conversor ao carregar a página.
+        updateLiveConv();
+    </script>
+
+</body>
+</html>
